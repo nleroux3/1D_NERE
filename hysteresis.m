@@ -69,16 +69,7 @@ if wrc_ini == 1  % On main wetting curve
         
         psi = - (((theta_2 - theta_r(order))/(theta_s(order) - theta_r(order)))^(-1/m)-1)^(1/n) /alpha;
         
-        if theta_2 > thetaR_dry
-            P_w = - (((theta_2 - thetaR_dry)/(thetaS - thetaR_dry))^ (-1/m)-1)^(1/n) /alpha;
-            
-            if abs(psi) > abs(P_w)  %  Moves to main drying curve
-                wrc = 2;
-                order = 1;
-                thetaR = thetaR_dry;
-                psi = P_w;
-            end
-        end
+
     end
     return
     
@@ -90,28 +81,15 @@ if wrc_ini == 3 % On drying scanning curve
     if theta_2 <= theta_1 %  stays on drying scanning curve
         
         
-        if theta_2 > theta_di(2)
-            while theta_2 < theta_di(order)
-                order = order - 2;
-            end
-        else
-            theta_2 = theta_di(2) + 1e-5;
+        while theta_2 < theta_di(order)
+            order = order - 2;
         end
+  
         
         psi = - (((theta_2 - theta_r(order))/(theta_s(order) - theta_r(order)))^(-1/m)-1)^(1/n)/alpha;
         
         Swf = 0.5 * ((theta_2/thetaS - thetaR/thetaS) + sqrt((theta_2/thetaS - thetaR/thetaS)^2 + 4/(thetaS/thetaR_dry-1) *(theta_2/thetaS - thetaR/thetaS) ));
         
-        if theta_2 > thetaR_dry
-            P_w = - (((theta_2 - thetaR_dry)/(thetaS - thetaR_dry))^ (-1/m)-1)^(1/n) /alpha;
-            
-            if abs(psi) > abs(P_w)  %  Moves to main drying curve
-                wrc = 2;
-                order = 1;
-                thetaR = thetaR_dry;
-                psi = P_w;
-            end
-        end
         
     else  % WRC moves to wetting scanning (di: drainage to imbibition)
         
@@ -176,7 +154,6 @@ if wrc_ini == 4 %  On wetting scanning scanning
         end
         
         
-        
     else  % WRC moves to drying scanning curve (id : imbibition to dyring)
         
         order  = order + 1;
@@ -202,13 +179,11 @@ if wrc_ini == 4 %  On wetting scanning scanning
         
         theta_r(order) = (Sd_Pdi * theta_s(order) - theta_di(order)) / (Sd_Pdi - 1);
         
-        if theta_2 > theta_di(2)
-            while theta_2 < theta_di(order)
-                order = order - 2;
-            end
-        else
-            theta_2 = theta_di(2) + 1e-5;
+
+        while theta_2 < theta_di(order)
+            order = order - 2;
         end
+
         
         if order > 5
             order = order - 2;
@@ -216,16 +191,6 @@ if wrc_ini == 4 %  On wetting scanning scanning
         
         psi = - (((theta_2 - theta_r(order))/(theta_s(order)-  theta_r(order)))^(-1/m)-1)^(1/n) /alpha;
         
-        if theta_2 > thetaR_dry
-            P_w = - (((theta_2 - thetaR_dry)/(thetaS - thetaR_dry))^ (-1/m)-1)^(1/n) /alpha;
-            
-            if abs(psi) > abs(P_w)  %  Moves to main drying curve
-                wrc = 2;
-                order = 1;
-                thetaR = thetaR_dry;
-                psi = P_w;
-            end
-        end
         
     end
     return

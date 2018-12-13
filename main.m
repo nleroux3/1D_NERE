@@ -16,8 +16,8 @@
 % Please cite the following publication if you are using this code:       %
 %    Leroux, N.R. and J.W. Pomeroy (2018), Simulation of Capillary        %
 %    Overshoot in Snow Combining Trapping of the Wetting Phase with a     %
-%    Non-Equilibrium Richards Equation Model, Water Resources Research    %               
-%                                                                         %                 
+%    Non-Equilibrium Richards Equation Model, Water Resources Research    %
+%                                                                         %
 %                                                                         %
 %=========================================================================%
 %=========================================================================%
@@ -29,7 +29,7 @@
 %  This program is distributed in the hope that it will be useful,        %
 %  but WITHOUT ANY WARRANTY; without even the implied warranty of         %
 %  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          %
-%  GNU General Public License for more details.                           % 
+%  GNU General Public License for more details.                           %
 %                                                                         %
 %  You should have received a copy of the GNU General Public License      %
 %  along with this program.  If not, see <https://www.gnu.org/licenses/>. %
@@ -47,7 +47,7 @@ lambda = 1; % Parameter for relaxation coefficient tau [-]
 epsilon = 1e-6; % Initial value of water content if initially dry [m3 m-3]
 
 % Space grid:
-z0=0.0;  
+z0=0.0;
 zN=0.2;  % Snow depth [m]
 dz=0.001;  % Space resolution [m]
 z=z0+dz/2:dz:zN-dz/2;  % Spatial grid [m]
@@ -81,7 +81,7 @@ theta_id(1:nz,1:6) = thetaS;  % Water content at reversal point from wetting to 
 theta_di(1:nz,1:6) = repmat(thetaR',1,6); % Water content at reversal point from drainage to wetting processes [m3 m-3]
 Pdi = zeros(1,nz)-inf;  % Capillary pressure wt reversal point from drainage to wetting processes [m]
 Pid = zeros(1,nz);    % Capillary pressure wt reversal point from wetting to drainage processes [m]
-F = zeros(nz,1);   % Matrix containing gravitational and capillary forces 
+F = zeros(nz,1);   % Matrix containing gravitational and capillary forces
 psi = zeros(1,nz); % Capillary pressure [m]
 Swf = zeros(1,nz); % Flowing saturation [-]
 
@@ -135,9 +135,31 @@ for t = 1:nt
     theta_new = (M\F)' + theta;
     
     for i = 1:nz
-        [psi(i),thetaR(i),theta_id(i,:),theta_di(i,:),theta_s(i,:),theta_r(i,:),order(i),wrc(i),Pdi(i),Pid(i), Swf(i)] = ...
-            hysteresis(theta(i),theta_new(i),theta_s(i,:),theta_r(i,:),theta_id(i,:),theta_di(i,:),order(i),...
-            n,m,alpha,alpha_wetting,thetaS,thetaR(i),wrc(i),psi(i), thetaR_dry,Pdi(i),Pid(i));
+        
+        if(theta_new(i) >= porosity)
+            
+            if (i > 1)
+                theta_new(i-1) = theta_new(i-1) + (theta_new(i) - (porosity - 1e-6));
+            end
+            theta_new(i) = porosity - 1e-6; % To avoid divergence in psi
+            
+            wrc(i) = 2;
+            order(i) = 1;
+            thetaR(i) = thetaR_dry;
+            theta_s(i,1) = thetaS;
+            theta_r(i,1) =  thetaR(i);
+            theta_di(i,1) = thetaR(i);
+            theta_id(i,1) = thetaS;
+            Pdi(i) = -inf;
+            Pid(i) = 0;
+            psi(i) = -((((theta_new(i) - thetaR)/(thetaS-thetaR))^(-1/m) - 1) ^(1/n)) / alpha  ;
+            
+        else
+            
+            [psi(i),thetaR(i),theta_id(i,:),theta_di(i,:),theta_s(i,:),theta_r(i,:),order(i),wrc(i),Pdi(i),Pid(i), Swf(i)] = ...
+                hysteresis(theta(i),theta_new(i),theta_s(i,:),theta_r(i,:),theta_id(i,:),theta_di(i,:),order(i),...
+                n,m,alpha,alpha_wetting,thetaS,thetaR(i),wrc(i),psi(i), thetaR_dry,Pdi(i),Pid(i));
+        end
     end
     
     
