@@ -56,7 +56,7 @@ nz=numel(z);  % Number of cells
 % Snow properties
 density = 300;   % initial dry snow density [kg/m3]
 Dgrain = 1e-3;   % initial grain size [m]
-
+porosity = 1. - density / 917. ;
 
 % Hydraulic parameters:
 thetaR_dry = 0.039; % Maximum residual water content (for boundary drying curve) [m3 m-3]
